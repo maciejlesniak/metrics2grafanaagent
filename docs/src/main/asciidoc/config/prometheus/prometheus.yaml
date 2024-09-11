@@ -1,0 +1,14 @@
+alertmanager:
+  enabled: false
+kube-state-metrics:
+  enabled: false
+prometheus-node-exporter:
+  enabled: false
+prometheus-pushgateway:
+  enabled: false
+server:
+  persistentVolume:
+    enabled: false
+  extraFlags:
+    - web.enable-lifecycle
+    - web.enable-remote-write-receiver
