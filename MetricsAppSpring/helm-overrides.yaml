@@ -1,0 +1,9 @@
+image:
+  tag: spring
+
+labels:
+  type: spring
+  app: metrics-app
+
+probes:
+  health: /actuator/health

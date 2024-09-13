@@ -1,0 +1,9 @@
+image:
+  tag: quarkus
+
+labels:
+  type: quarkus
+  app: metrics-app
+
+probes:
+  health: /q/health

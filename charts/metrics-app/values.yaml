@@ -1,0 +1,15 @@
+replicaCount: 1
+
+image:
+  repository: macieklesniak/demo-metrics-app
+  tag: null
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  port: 8080
+
+labels: []
+
+probes:
+  health: null
