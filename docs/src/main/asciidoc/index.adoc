@@ -176,11 +176,11 @@ kubectl run -it --rm --restart=Never -n ga testing --image=macieklesniak/testing
 jvm_classes_loaded_classes
 ```
 
-image::images/image-2024-09-17-12-09-04-412.png[]
+image::images/k8s.png[]
 
-image::images/image-2024-09-17-12-08-12-371.png[]
+image::images/grafanaagent.png[]
 
-image::images/image-2024-09-17-12-07-42-234.png[]
+image::images/prometheus.png[]
 
 // [source,shell]
 // ----
