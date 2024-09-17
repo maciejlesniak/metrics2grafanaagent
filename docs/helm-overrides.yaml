@@ -1,0 +1,13 @@
+image:
+  tag: docs
+
+labels:
+  type: docs
+  app: nginx
+
+deployment:
+  containerPort: 80
+  hostPort: 8080
+
+probes:
+  health: /

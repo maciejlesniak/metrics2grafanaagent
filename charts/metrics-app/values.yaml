@@ -9,6 +9,10 @@ service:
   type: ClusterIP
   port: 8080
 
+deployment:
+  containerPort: 8080
+  hostPort: 8080
+
 labels: []
 
 probes:

@@ -2,7 +2,7 @@
 
 === Concept
 
-image:images/monitoring.png[align="center"]
+image:images/architecture.png[align="center"]
 
 === Prerequisites
 
@@ -114,12 +114,6 @@ helm -n ga list
 
 The built-in remote write receiver can be enabled by setting the `--web.enable-remote-write-receiver` command line flag. When enabled, the remote write receiver endpoint is `/api/v1/write`.
 
-.Prometheus config overrides
-[source,yaml]
-----
-include::config/prometheus/prometheus.yaml[]
-----
-
 .Port forwarding for Prometheus
 [source,shell]
 ----
@@ -138,11 +132,12 @@ helm uninstall -n ga prometheus
 
 https://grafana.com/docs/agent/latest/flow/tasks/configure/configure-kubernetes/[Official config guide]
 
-Grafana Agent consists of 3 parts:
+Grafana Agent consists of 4 functional parts:
 
-* prometheus scraping
-* K8S discovery
-* prometheus remote write
+* https://grafana.com/docs/agent/latest/flow/reference/components/prometheus.scrape/[prometheus scraping]
+* https://grafana.com/docs/agent/latest/flow/reference/components/discovery.kubernetes/[K8S discovery]
+* https://grafana.com/docs/agent/latest/flow/reference/components/prometheus.remote_write/[prometheus `remote write`]
+* https://grafana.com/docs/agent/latest/flow/reference/components/discovery.relabel/[discovery relabel]
 
 .Components for the simplest configuration
 image::images/ga_components.png[width="500",align="center"]
@@ -151,9 +146,9 @@ All of these components are configured in a single file/config map that is defin
 
 
 .Customized config map with 2 scraping targets
-[source,yaml]
+[source,river]
 ----
-include::../../../../GrafanaAgentConfig/values-override.yaml[]
+include::example-configs/ga.river[]
 ----
 
 .Check new values in action
@@ -165,21 +160,33 @@ helm upgrade -n ga grafana-agent-flow grafana/grafana-agent -f ./config/ga/value
 
 === Demo and debugging
 
+.Run documentation
+[source,shell]
+----
+export POD_NAME=$(kubectl get pods --namespace ga -l "type=docs" -o jsonpath="{.items[0].metadata.name}")
+kubectl --namespace ga port-forward $POD_NAME 1111:80
+----
+
 .Debug POD inside the cluster
 [source,shell]
 ----
 kubectl run -it --rm --restart=Never -n ga testing --image=macieklesniak/testing-env:latest bash
 ----
 
-.Simple metrics to trace
-```
+.A metric common for all applications
+----
+# All jvm_* metrics like:
 jvm_classes_loaded_classes
-```
+jvm_buffer_count_buffers
+----
 
+.Demo K8S layout
 image::images/k8s.png[]
 
+.Demo Grafana Agent configuration w/ metrics relabeling
 image::images/grafanaagent.png[]
 
+.Demo Prometheus configuration w/ additional metrics attached
 image::images/prometheus.png[]
 
 // [source,shell]

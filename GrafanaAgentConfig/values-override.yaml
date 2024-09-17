@@ -39,8 +39,28 @@ agent:
         }
       }
       
+      discovery.relabel "relabel_spring_pods" {
+        targets = discovery.kubernetes.spring_pods.targets
+        rule {
+          source_labels = ["__meta_kubernetes_pod_container_name", "__meta_kubernetes_pod_label_type"]
+          separator     = "/"
+          target_label  = "container_type"
+          action        = "replace"
+        }
+      }
+      
+      discovery.relabel "relabel_quarkus_pods" {
+        targets = discovery.kubernetes.quarkus_pods.targets
+        rule {
+          source_labels = ["__meta_kubernetes_pod_container_name", "__meta_kubernetes_pod_label_type"]
+          separator     = "/"
+          target_label  = "container_type"
+          action        = "replace"
+        }
+      }
+      
       prometheus.scrape "spring_pods" {
-        targets    = discovery.kubernetes.spring_pods.targets
+        targets    = discovery.relabel.relabel_spring_pods.output
         forward_to = [prometheus.remote_write.default.receiver]
         scrape_interval = "10s"
         scrape_timeout = "5s"
@@ -48,7 +68,7 @@ agent:
       }
       
       prometheus.scrape "quarkus_pods" {
-        targets    = discovery.kubernetes.quarkus_pods.targets
+        targets    =  discovery.relabel.relabel_quarkus_pods.output
         forward_to = [prometheus.remote_write.default.receiver]
         scrape_interval = "10s"
         scrape_timeout = "5s"

@@ -1,0 +1,76 @@
+  logging {
+    level = "debug"
+    format = "logfmt"
+  }
+
+  discovery.kubernetes "spring_pods" {
+    role = "pod"
+    attach_metadata {
+      node = true
+    }
+    namespaces {
+      own_namespace = true
+      names         = ["ga"]
+    }
+    selectors {
+      role  = "pod"
+      label = "app=metrics-app,type=spring"
+    }
+  }
+
+  discovery.kubernetes "quarkus_pods" {
+    role = "pod"
+    attach_metadata {
+      node = true
+    }
+    namespaces {
+      own_namespace = true
+      names         = ["ga"]
+    }
+    selectors {
+      role  = "pod"
+      label = "app=metrics-app,type=quarkus"
+    }
+  }
+
+  discovery.relabel "relabel_spring_pods" {
+    targets = discovery.kubernetes.spring_pods.targets
+    rule {
+      source_labels = ["__meta_kubernetes_pod_container_name", "__meta_kubernetes_pod_label_type"]
+      separator     = "/"
+      target_label  = "container_type"
+      action        = "replace"
+    }
+  }
+
+  discovery.relabel "relabel_quarkus_pods" {
+    targets = discovery.kubernetes.quarkus_pods.targets
+    rule {
+      source_labels = ["__meta_kubernetes_pod_container_name", "__meta_kubernetes_pod_label_type"]
+      separator     = "/"
+      target_label  = "container_type"
+      action        = "replace"
+    }
+  }
+
+  prometheus.scrape "spring_pods" {
+    targets    = discovery.relabel.relabel_spring_pods.output
+    forward_to = [prometheus.remote_write.default.receiver]
+    scrape_interval = "10s"
+    scrape_timeout = "5s"
+    metrics_path = "/actuator/prometheus"
+  }
+
+  prometheus.scrape "quarkus_pods" {
+    targets    =  discovery.relabel.relabel_quarkus_pods.output
+    forward_to = [prometheus.remote_write.default.receiver]
+    scrape_interval = "10s"
+    scrape_timeout = "5s"
+    metrics_path = "/q/metrics"
+  }
+
+  prometheus.remote_write "default" {
+    endpoint {
+      url = "http://prometheus-server.ga.svc.cluster.local/api/v1/write"
+    }
+  }
